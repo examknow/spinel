@@ -152,7 +152,7 @@ class Server(BaseServer):
         self.banchan_accounts = bc_accounts
         self.banchan_counts   = channels
 
-    async def _oper_up(self,
+    async def _oper_challenge(self,
             oper_name: str,
             oper_file: str,
             oper_pass: str):
@@ -179,11 +179,21 @@ class Server(BaseServer):
                     await self.send(build("CHALLENGE", [f"+{retort}"]))
                     break
 
+    async def _oper_up(self,
+            oper_name: str,
+            oper_pass: str,
+            oper_file: Optional[str]):
+
+        if oper_file is not None:
+            await self._oper_challenge(oper_name, oper_file, oper_pass)
+        else:
+            await self.send(build("OPER", [oper_name, oper_pass]))
+
     async def line_read(self, line: Line):
         if line.command == RPL_WELCOME:
             await self.send(build("MODE", [self.nickname, "+g"]))
             oper_name, oper_file, oper_pass = self._config.oper
-            await self._oper_up(oper_name, oper_file, oper_pass)
+            await self._oper_up(oper_name, oper_pass, oper_file)
 
         elif line.command == RPL_YOUREOPER:
             pass

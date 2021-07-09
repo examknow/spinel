@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from os.path     import expanduser
-from typing      import List, Tuple
+from typing      import List, Tuple, Optional
 
 import yaml
 
@@ -14,7 +14,7 @@ class Config(object):
     channels: List[str]
 
     sasl: Tuple[str, str]
-    oper: Tuple[str, str]
+    oper: Tuple[str, Optional[str], str]
 
     banchan_prefix: str
     banchan_count:  int
@@ -36,7 +36,9 @@ def load(filepath: str):
     port = int(port_s)
 
     oper_name = config_yaml["oper"]["name"]
-    oper_file = expanduser(config_yaml["oper"]["file"])
+    oper_file: Optional[str] = None
+    if "file" in config_yaml["oper"]:
+        oper_file = expanduser(config_yaml["oper"]["file"])
     oper_pass = config_yaml["oper"]["pass"]
 
     return Config(
